@@ -1,0 +1,83 @@
+version: '3'
+services:
+  code-server:
+    image: ghcr.io/linuxserver/code-server
+    container_name: code-server
+    environment:
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+      - PUID=${CODE_PUID}
+      - PGID=${CODE_PGID}
+      - PASSWORD=${CODE_PASSWORD}
+      - SUDO_PASSWORD=${CODE_SPASSWORD}
+      - DOCKER_MODS=linuxserver/mods:code-server-docker
+    volumes:
+      - ${CODE_HOST_PATH}/config:/config
+      - ${HA_PATH}:/config/ha
+      - ${COMPOSE_PATH}:/config/docker-compose
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - ${CODE_PORT}:8443
+    restart: unless-stopped
+  duckdns:
+    image: linuxserver/duckdns
+    container_name: duckdns
+    environment:
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+      - PUID=${DUCKDNS_PUID}
+      - PGID=${DUCKDNS_PGID}
+      - SUBDOMAINS=${DUCKDNS_DOMAIN_NAME}
+      - TOKEN=${DUCKDNS_TOKEN}
+      - LOG_FILE=true
+    volumes:
+      - ${DUCKDNS_PATH}:/config
+    restart: unless-stopped
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    network_mode: host
+    volumes:
+      - grafana_storage:/var/lib/grafana
+      - ./grafana-provisioning/:/etc/grafana/provisioning
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+  homeassistant:
+    container_name: home-assistant
+    image: homeassistant/raspberrypi4-homeassistant:latest
+    volumes:
+      - ${HA_PATH}:/config
+    restart: always
+    network_mode: host
+    ports:
+      - "${HA_PORT}"
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    network_mode: host
+    restart: always
+    environment:
+      - INFLUXDB_DB=${INFLUXDB_DB}
+      - INFLUXDB_USER=${INFLUXDB_USER}
+      - INFLUXDB_USER_PASSWORD=${INFLUXDB_USER_PASSWORD}
+      - INFLUXDB_HTTP_ENABLED=true
+    volumes:
+      - influxdb_storage:/var/lib/influxdb
+    ports:
+      - "8086:8086" 
+      - "2003:2003"
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    restart: always
+    ports:
+      - ${PORTAINER_PORT}:9000
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+volumes:
+  influxdb_storage:
+  grafana_storage:
+  portainer_data:
