@@ -125,6 +125,14 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_HOST_AUTH_METHOD=trust
+  homeassistant:
+    container_name: home-assistant
+    image: homeassistant/raspberrypi4-homeassistant:latest
+    volumes:
+      - ./homeassistant:/config
+    restart: unless-stopped
+    networks:
+      - metrics
 volumes:
   influxdb_storage:
   grafana_storage:
