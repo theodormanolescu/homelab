@@ -47,7 +47,7 @@ services:
       - INFLUXDB_ADMIN_USER=${INFLUX_ADMIN}
       - INFLUXDB_ADMIN_PASSWORD=${INFLUX_ADM_PASSWORD}
       - INFLUXDB_USER=${INFLUX_USER}
-      - INFLUXDB_USER_PASSWORD=${INFLUX_P ASSWORD}
+      - INFLUXDB_USER_PASSWORD=${INFLUX_PASSWORD}
     volumes:
       - influxdb_storage:/var/lib/influxdb
     networks:
@@ -109,8 +109,8 @@ services:
       - REDMINE_SECRET_KEY_BASE=${REDMINE_KEY}
       - REDMINE_PLUGINS_MIGRATE=true
     volumes:
-      - redmine-plugins:/usr/src/redmine/plugins
-      - redmine-themes:/usr/src/redmine/public/themes
+      - ./redmine/plugins:/usr/src/redmine/plugins
+      - ./redmine/themes:/usr/src/redmine/public/themes
       - redmine-data:/usr/src/redmine/files
   postgres:
     image: postgres:latest
@@ -129,8 +129,6 @@ volumes:
   influxdb_storage:
   grafana_storage:
   postgres-data:
-  redmine-plugins:
-  redmine-themes:
   redmine-data:
 networks:
   metrics:
