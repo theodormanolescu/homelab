@@ -5,9 +5,9 @@ services:
     restart: unless-stopped
     container_name: npm
     ports:
-      - '80:80'
-      - '443:443'
-      - '81:81'
+      - 80:80
+      - 443:443
+      - 81:81
     environment:
       DB_SQLITE_FILE: "/data/database.sqlite"
       DISABLE_IPV6: 'true'
@@ -47,7 +47,7 @@ services:
       - INFLUXDB_ADMIN_USER=${INFLUX_ADMIN}
       - INFLUXDB_ADMIN_PASSWORD=${INFLUX_ADM_PASSWORD}
       - INFLUXDB_USER=${INFLUX_USER}
-      - INFLUXDB_USER_PASSWORD=${INFLUX_PASSWORD}
+      - INFLUXDB_USER_PASSWORD=${INFLUX_P ASSWORD}
     volumes:
       - influxdb_storage:/var/lib/influxdb
     networks:
@@ -59,8 +59,6 @@ services:
       - grafana_storage:/var/lib/grafana
       - ./grafana-provisioning/:/etc/grafana/provisioning
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     depends_on:
       - influxdb
     networks:
@@ -71,14 +69,14 @@ services:
   pihole:
     container_name: pihole
     image: pihole/pihole:latest
+    depends_on:
+      - npm
     networks:
       - metrics
     ports:
       - "53:53/tcp"
       - "53:53/udp"
       - "67:67/udp"
-      - "3001:80/tcp"
-      - "444:443/tcp"
     dns:
       - 127.0.0.1
       - 1.1.1.1
@@ -100,10 +98,9 @@ services:
     container_name: redmine
     depends_on:
       - postgres
+      - npm
     networks:
       - metrics
-    ports:
-      - 3002:3000
     environment:
       - REDMINE_DB_POSTGRES=postgres
       - REDMINE_DB_DATABASE=${REDMINE_DB}
